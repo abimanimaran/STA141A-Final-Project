@@ -1,0 +1,716 @@
+---
+title: "STA 141a Final Report"
+subtitle: 'Instructor: Dr. Akira Horiguchi'
+author: "Abinaya Manimaran, Ella Santos, Kali Gieschen, Nitya Golla"
+date: "2024-12-12"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=TRUE}
+# setting seed to ensure reproducibility
+set.seed(42)
+```
+
+# World Happiness
+
+### Executive Summary
+
+This project examines global happiness data from the World Happiness
+Report to understand what drives happiness and to determine
+relationships between the features. The report annually evaluates
+happiness levels by country based on factors such as GDP per capita,
+healthy life expectancy, social support, freedom to make life choices,
+generosity, and perceptions of corruption. By analyzing data from
+2020-2024, we aimed to understand the factors that most significantly
+influence happiness, how these factors are correlated, and how trends
+have evolved over time. We explored the data through exploratory data
+analysis and data visualizations such as scatter plots, correlation
+matrices, histograms, and linear regression models. Through this, we
+found positive relationships for social support, healthy life
+expectancy, and GDP per capita with happiness scores. There is a
+negative relationship with corruption perception and happiness scores.
+There was a moderate relationship with freedom to make life choices with
+happiness scores. And, there was little to no relationship for
+generosity with happiness. We also found that Finland and Austria have
+consistently been the happiest countries, while Switzerland has dropped
+over the past five years. Through these visualizations and models, we
+were able to answer our key questions and explore the data.
+
+### Introduction and Background
+
+The World Happiness Report generates a yearly report that details global
+happiness levels by country. Data is collected from each country by
+having residents rank their happiness using a ladder score, as well as
+looking at GDP per capita, health life expectancy, social support,
+freedom to make life choices, generosity and perception of corruption.
+These rankings provide insights on overall well-being and quality of
+life across nations. We want to analyze this data because of the huge
+effect happiness has on almost everything in our daily lives. Working
+towards increasing happiness could improve our mental and physical help,
+community, and overall well being. There are many reasons one would want
+to increase their happiness levels, if we can find the main contributors
+to increasing happiness we may be able to help ourselves and the people
+around us, especially for the countries that are ranked lower
+consistently throughout the years.
+
+### Overall Goal
+
+Our main goal of this project is to see which factors from the happiness
+data have the biggest effect on overall happiness and examine the
+fluctuation of countries' levels of happiness over the past five years,
+as well as see which factors have the biggest impact on happiness scores
+to see what improvements could be made to different countries to help
+improve their overall happiness.
+
+### 2-3 key questions to be addressed:
+
+1.  Which factor has the highest effect on the happiness rank of each
+    country?
+2.  Is there a strong correlation between 2 variables?
+3.  Are there noticeable trends in happiness over recent years, and what
+    factors are driving these changes?
+
+### Data Description and Exploratory Data Analysis
+
+We utilized 5 different data sets, each for a year, 2020 - 2024, each
+containing 21 columns and 140 rows. All data sets used came directly
+from the World Happiness Report website. The columns were features that
+contributed to the overall ranking while each row contained a country.
+We started by cleaning the data and pulling out only the columns that
+overlapped throughout each year. In the end we selected six different
+variables from the World Happiness Report to compare to the happiness
+scores or subjective well being, as well as the rank given to each
+country. These were the main variables studied each year in the Gallup
+World Poll surveys. Every variable we are analysing are observed values
+and are calculated by collecting 2000-3000 data points to ensure it is
+large enough to reflect the entire population. The happiness score is
+determined by the questionnaire from the Gallup World Poll survey. It is
+called the Cantril Ladder, “it asks respondents to think of a ladder,
+with the best possible life for them being a 10 and the worst possible
+life being a 0.” And then each country is ranked based on their ladder
+score.
+
+1.  Social Support means having someone in times of need. For this
+    variable it is the national average of binary responses to the GWP
+    question “If you were in trouble, do you have relatives or friends
+    you can count on to help you whenever you need them, or not?”
+2.  Healthy Life Expectancy is the healthy life expectancy at birth
+    which is taken from World Health Organization’s (WHO) Global Health
+    Observatory data repository.
+3.  Logged GDP per Capita is the logged purchasing power parity in 2017
+    international dollar prices of each country.
+4.  Freedom to Make Life Choices is the national average of responses to
+    the GWP question “Are you satisfied or dissatisfied with your
+    freedom to choose what you do with your life?”
+5.  Generosity - a value calculated from survey data from the question
+    “Have you donated money to a charity in this past month?” Data is
+    adjusted by GDP per capita to ensure data reflect charitable
+    behavior beyond economic wealth.
+6.  Perceptions of Corruption is the national average of the survey
+    responses to two questions in the GWP: “Is corruption widespread
+    throughout the government or not” and “Is corruption widespread
+    within businesses or not?” The average value of these binary
+    responses is used as the corruption variable.
+
+```{r, include=TRUE}
+library(readxl)
+# reading in data from excel files from world happiness data website
+happy2020 = read_excel("happy2020.xls")
+happy2020 = data.frame(happy2020)
+happy2021 = read_excel("happy2021.xls")
+happy2021 = data.frame(happy2021)
+happy2022 = read_excel("happy2022.xls")
+happy2022 = data.frame(happy2022)
+happy2023 = read_excel("happy2023.xls")
+happy2023 = data.frame(happy2023)
+happy2024 = read_excel("happy2024.xls")
+happy2024 = data.frame(happy2024)
+
+# columns we want to analyze and compare
+keep_columns <- c("Country", "Rank", "LadderScore", "SocialSupport", 
+                  "LifeExpectancy", "LoggedGDP", 
+                  "FreedomChoice", "Generosity", 
+                  "Corruption")
+
+# cleaning up the data sets to included on 9 variables 
+happy2020 <- happy2020[, keep_columns, drop = FALSE]
+happy2021 <- happy2021[, keep_columns, drop = FALSE]
+happy2022 <- happy2022[, keep_columns, drop = FALSE]
+happy2023 <- happy2023[, keep_columns, drop = FALSE]
+happy2024 <- happy2024[, keep_columns, drop = FALSE]
+```
+
+#### Figure 1
+
+In this figure below we used the pairs() function on our combined data
+set to see all of the 2-D scatter plots with the numeric and relevant
+values in our data set. By running this code we are able to see if any
+positive or negative relationships exist between the important variables
+and the happiness score. We found that there is a positive linear
+looking relationship between happiness scores and social support, life
+expectancy, and logged gdp values. There seems to be a looser fitting
+positive linear relationship between happiness and freedom of choice as
+well. And there doesn't seem to be a very obvious relationship between
+happiness scores and generosity. And potentially a negative relationship
+between happiness scores and corruption, which would make sense. As
+corruption decreases the happiness scores would increase.
+
+```{r, include = TRUE}
+library(ggplot2)
+library(GGally)
+happy2020$Year = 2020
+happy2021$Year = 2021
+happy2022$Year = 2022
+happy2023$Year = 2023
+happy2024$Year = 2024
+
+combined_data = rbind(happy2020, happy2021, happy2022,happy2023,happy2024)
+combined_data = na.omit(combined_data)
+```
+
+Summary Statistics of our data frame that contains all 5 years of data.
+Running this allows us to see the important details about each variable
+we plan to use in our model. It allows us to get a better feel for the
+data and utilize it in the best way possible.
+
+```{r, echo=TRUE, fig.height = 2.5, fig.width = 3}
+summary(combined_data)
+```
+
+Looking at the summary statistics, we can determine that Ladder Score
+has a slight negative skew indicating that there are more Country's
+scattered around the higher end of the range. Social support has a
+slight left skew indicating that more countries have higher social
+support. Life expectancy has a negative skew, most Country's have a
+higher life expectancy but a few Country's on the lower end are pulling
+the average down. Logged GDP has a slight left skew indicating that most
+Country's have relatively high GDPs with a few Country's pulling down
+the average. Freedom of Choice has a slight left skew meaning the that a
+few Country's are pulling down the average. Generosity seems to have a
+symmetrical distribution with mean and median being very similar.
+Corruption has a slight left skew indicating that a few Countries with
+higher levels are corruption are pulling the average down. This data set
+uses approximately 140 Country's out of the 195, this indicates that
+approximately 50 Country's don't have this data. We can assume the data
+may be more symmetrically distributed if we had all this data available.
+The Ladder Score ranges from 1.859 to 7.842, indicating a wide spread.
+
+```{r,echo=TRUE}
+pairs(combined_data[,2:9],col="lightblue",pch=20) # taking only numeric columns from data set 
+```
+
+#### Figure 2-4
+
+These ggpairs() plots allow us to see even more than the pairs()
+functions, such as correlation values between the variables with
+happiness score and a density plot along the main diagonal for the 3
+figures. We are able to see some of the scatter plots better this way as
+well to continue visualizing our foundation variables.
+
+```{r, echo = TRUE,fig.height = 2.5, fig.width = 6}
+library(ggplot2)
+library(GGally)
+ggpairs(combined_data, columns = c(3,4,5)) #looking at happiness score, social support, and life expectancy
+ggpairs(combined_data, columns = c(3,6,7)) #looking at happiness score, logged gdp, and freedom of choice
+ggpairs(combined_data, columns = c(3,8,9)) #looking at happiness score, generosity, and corruption
+```
+
+Using the 5 data sets, we created a combined one with an extra column
+year, each country would have 4 rows. This allowed us to visualize
+trends across years and across various features. When visualizing our
+data, we tend to use the top 10 to 20 countries as all 140 are generally
+difficult to visualize. (see Figure 1)
+
+Our visualizations were all done in Rstudio and use built in R packages:
+ggplot2, dplyr, tidyr. The figures below represent a portion of our
+exploratory data analysis:
+
+```{r, echo = TRUE,fig.height = 4.25, fig.width = 5.5}
+library(ggplot2)
+library(reshape2)
+
+combined_data = rbind(happy2020, happy2021, happy2022, happy2023, happy2024)
+
+combined_data_no_country = combined_data[, !(names(combined_data) == "Country")]
+
+cor_matrix = cor(combined_data_no_country, use = "complete.obs")
+
+cor_matrix_melted <- reshape2::melt(cor_matrix)
+
+ggplot(cor_matrix_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "white") +  # Create tiles with white borders
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), 
+                       name = "Correlation") +   # Color scale for the heatmap
+  geom_text(aes(label = round(value, 2)), color = "black", size = 3) +   # Add correlation numbers
+  theme_minimal() +   # Use a minimal theme
+  labs(title = "Correlation Matrix", x = "", y = "") +  # Title and axis labels
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels
+  coord_fixed()  # Ensure the aspect ratio is fixed for the tiles
+
+```
+
+#### Figure 5
+
+Correlation matrix above showcases the correlation values between every
+variable for all the data across all 5 years. A darker red indicates a
+strong positive correlation while a darker purple indicates a strong
+negative correlation.
+
+#### Figure 6
+
+Our first attempt at visualizing countries and their rank over the 4
+years. Quickly realized using all 140 countries is unrealistic hence our
+use of the top 10 to 20 over the next visualizations.
+
+```{r, echo = TRUE, fig.height = 2.5, fig.width = 6}
+library(ggplot2)
+
+ggplot(combined_data, aes(x = Year, y = Rank)) +
+  geom_line(aes(group = Country), color = "blue", linewidth = 1) +
+  geom_point(aes(color = Country), size = 3) + 
+  labs(title = "Rank by Year", x = "Year", y = "Rank") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+```
+
+#### Figure 7
+
+Visualizing the ranks across the years to determine which countries
+consistently rank high, which fell out of the top 10, and which recently
+joined the top 10. Finland and Austria rank first and second
+respectively for all 5 years. Switzerland drops from 3rd to 9th from
+2021 to 2024. Using these insights we later looked at how feature values
+changed in relation to rank.
+
+```{r, include = TRUE}
+library(dplyr)
+top2024 = happy2024 %>% filter(Rank >= 1 & Rank<= 10)
+top2023 = happy2023 %>% filter(Rank >= 1 & Rank<= 10)
+top2022 = happy2022 %>% filter(Rank >= 1 & Rank<= 10)
+top2021 = happy2021 %>% filter(Rank >= 1 & Rank<= 10)
+top2020 = happy2020 %>% filter(Rank >= 1 & Rank<= 10)
+# editing country name so that it works better
+top2022 = top2022 %>%
+  mutate(Country = gsub("Luxembourg\\*", "Luxembourg", Country))
+# new data set that contains the top 10 countries for each year
+topCombined = rbind(top2024,top2023,top2022,top2021,top2020)
+```
+
+```{r, echo=TRUE, fig.height = 2.5, fig.width = 6}
+library(ggplot2)
+# making scatter plot 
+ggplot(topCombined, aes(x = Year, y = Rank, color = Country, group = Country)) +
+  geom_line()+
+  geom_point()+
+  scale_y_reverse() +  # Reverse the y-axis since lower rank is better
+  labs(
+    title = "Top 10 Countries by Happiness Rank (2020-2024)",
+    x = "Year",
+    y = "Happiness Rank"
+  ) +
+  theme_minimal() +
+  theme(legend.title = element_blank(), legend.position = "right")
+```
+
+### Methodology and Approach
+
+All the models are supervised learning as we use a response variable to
+train the data. All our models utilize a test and train split of 20-80.
+
+#### Model 1: Linear Regression Model with all Features:
+
+First, we opened the data in R and cleaned the data for NA values. After
+exploring our data through graphs and summary statistics, we proceeded
+to model the relationship between various factors in our data and a
+Country’s overall happiness(Ladder Score) The question we aim to address
+is: How do the factors: Country name, social support, healthy life
+expectancy, logged gdp per capita, freedom to make life choices,
+generosity, perceptions of corruption, and year influence a Country’s
+overall happiness(ladder score)? We decided to use multiple linear
+regression as our model is predicting a numerical value using various
+features. We also insured to drop the feature Rank as it is directly
+correlated with Ladder Score(Rank is directly based on Ladder Score).
+
+```{r, include=TRUE}
+happy2020$Year <- 2020
+happy2021$Year <- 2021
+happy2022$Year <- 2022
+happy2023$Year <- 2023
+happy2024$Year <- 2024
+
+all_combined <- rbind(happy2024, happy2023, happy2022, happy2021, happy2020)
+all_combined <- na.omit(all_combined)
+```
+
+```{r,include=TRUE}
+colnames(all_combined)
+```
+
+```{r, include=TRUE}
+library(dplyr)
+
+all_combined$LadderScore <- as.numeric(all_combined$LadderScore)
+
+trainIndex <- sample(1:nrow(all_combined), size = 0.8 * nrow(all_combined))
+
+
+trainData <- all_combined[trainIndex, ]
+testData <- all_combined[-trainIndex, ]
+
+model <- lm(LadderScore ~ SocialSupport + LifeExpectancy + 
+              LoggedGDP + FreedomChoice + 
+              Generosity + Corruption + Year, data = trainData)
+
+predictions <- predict(model, testData)
+
+comparison <- data.frame(Actual = testData$LadderScore, Predicted = predictions)
+```
+
+```{r, fig.height = 2.5, fig.width = 3}
+summary(model)
+```
+
+```{r,echo=TRUE, fig.height = 2.5, fig.width = 3}
+head(comparison)
+```
+
+#### Model interpretation:
+
+The multiple R-squared is 0.7804 which suggests that approximately 78.4%
+of variability in the Ladder Score is explained by the variation in the
+model. Due to the number of variables and this being a linear model, we
+can assume this is a strong model. The adjusted R-squared, which adjusts
+for the number of predictors, is 0.7775 which confirms our assumption
+about the model explaining the Ladder Scores variance. As the
+F-statistic is 266 and the p-value is 2.2e\^-16, we can conclude that
+the coefficients are jointly statistically significant. Now looking at
+the features impact on Ladder Score, social support has an estimated
+standard deviation of 3.242, and as the social support increases by 1,
+the Ladder Score increases by 3.242. This indicates that social support
+strongly influences Ladder Score. Healthy Life Expectancy has an
+estimated standard deviation of 0.026 and as Healthy Life Expectancy
+increases by 1, the ladder score increases by 0.026 which suggests that
+better health correlates with happiness. The feature freedom to make
+life choices had a standard deviation of 1.976. This fact that the
+(p-value \< 2e\^16) indicates that this variable is statistically
+significant in predicting the ladder score. The generosity feature has
+an estimated standard deviation of 0.2367 with a p-value of 0.1245 which
+indicates that generosity does not have a substantial impact on
+happiness. This model's MSE is 0.2476255.
+
+```{r,echo=TRUE}
+# model mse
+mse <- mean((testData$LadderScore - predictions)^2)
+mse
+```
+
+```{r,echo=TRUE,fig.height = 2.75, fig.width = 3.5}
+residuals <- testData$LadderScore - predictions
+
+plot(predictions, residuals,
+     main = "Residuals vs Fitted",
+     xlab = "Fitted Values (Predicted Ladder Score)",
+     ylab = "Residuals",
+     pch = 19, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+#### Figure 8
+
+Residual plot confirms the model is homoskedastic. Our assumptions of
+linearity are supported as the plot shows no indication of a trend in
+the residuals.
+
+#### Model 2: Linear Regression with all Features but Year, Corruption, and Genorisity
+
+In this model we pulled out some of the variables to see which ones made
+the biggest difference on predicting happiness scores. In this model all
+coefficients are statistically significant which say that they all
+contribute to the accuracy of the prediction.
+
+```{r,include=TRUE}
+library(dplyr)
+
+all_combined$LadderScore <- as.numeric(all_combined$LadderScore)
+
+trainIndex <- sample(1:nrow(all_combined), size = 0.8 * nrow(all_combined))
+
+
+trainData <- all_combined[trainIndex, ]
+testData <- all_combined[-trainIndex, ]
+
+model <- lm(LadderScore ~ SocialSupport + LifeExpectancy + 
+              LoggedGDP + FreedomChoice, data = trainData)
+
+predictions <- predict(model, testData)
+
+comparison <- data.frame(Actual = testData$LadderScore, Predicted = predictions)
+```
+
+```{r}
+summary(model)
+```
+
+```{r, echo=TRUE}
+head(comparison)
+```
+
+```{r,echo=TRUE}
+# model mse
+mse <- mean((testData$LadderScore - predictions)^2)
+mse
+```
+
+In comparison to Model 1, this model included only specific features.
+The MSE for this model was a bit higher than the previous one which is
+probably a result of the model not being able to fit to the full
+variance of the data, due to the removed features.
+
+```{r,echo=TRUE,fig.height = 2.75, fig.width = 3.5}
+residuals <- testData$LadderScore - predictions
+
+plot(predictions, residuals,
+     main = "Residuals vs Fitted",
+     xlab = "Fitted Values (Predicted Ladder Score)",
+     ylab = "Residuals",
+     pch = 19, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+#### Model 3: Linear Regression with all Features but Year, Corruption, FreedomChoice, and Genorisity
+
+In this model we did similar steps to model two but used different
+regressors to continue to analyze which ones would be the best overall.
+This model also had all statistically significant coefficients and some
+standard errors that were slightly less than the last model.
+
+```{r,include=TRUE}
+library(dplyr)
+
+all_combined$LadderScore <- as.numeric(all_combined$LadderScore)
+
+trainIndex <- sample(1:nrow(all_combined), size = 0.8 * nrow(all_combined))
+
+
+trainData <- all_combined[trainIndex, ]
+testData <- all_combined[-trainIndex, ]
+
+model <- lm(LadderScore ~ SocialSupport + LifeExpectancy + 
+              LoggedGDP, data = trainData)
+
+predictions <- predict(model, testData)
+
+comparison <- data.frame(Actual = testData$LadderScore, Predicted = predictions)
+
+```
+
+```{r}
+summary(model)
+```
+
+```{r, echo=TRUE}
+head(comparison)
+```
+
+```{r,echo=TRUE}
+# model mse
+mse <- mean((testData$LadderScore - predictions)^2)
+mse
+```
+
+The MSE we computed for this test is higher than the last model which
+means that it is not quite a good fit as the last.
+
+```{r,include=TRUE}
+residuals <- testData$LadderScore - predictions
+
+plot(predictions, residuals,
+     main = "Residuals vs Fitted",
+     xlab = "Fitted Values (Predicted Ladder Score)",
+     ylab = "Residuals",
+     pch = 19, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+#### Polynomial Regression with all Features
+
+This model follows a polynomial equation. We can determine that it's low
+MSE and overall positive results are due the model being able to fit to
+the high variance of the data. The non-linear model is able to fit the
+complex data better.This model performed the worst. This could be due to
+a number of reasons: potential scaling issues, high dimensional data,
+and potential non-linearity present.
+
+```{r,include=TRUE}
+library(dplyr)
+
+trainIndex <- sample(1:nrow(all_combined), size = 0.8 * nrow(all_combined))
+trainData <- all_combined[trainIndex, ]
+testData <- all_combined[-trainIndex, ]
+
+model <- lm(LadderScore ~ SocialSupport + LifeExpectancy + 
+              LoggedGDP + FreedomChoice + 
+              Generosity + Corruption + Year +
+              I(LoggedGDP^2) + I(FreedomChoice^2), 
+            data = trainData)
+
+
+predictions <- predict(model, testData)
+
+comparison <- data.frame(Actual = testData$LadderScore, Predicted = predictions)
+
+head(comparison)
+
+```
+
+```{r,include=TRUE}
+summary(model)
+```
+
+```{r,echo=TRUE}
+head(comparison)
+```
+
+```{r,include=TRUE}
+residuals <- testData$LadderScore - predictions
+
+plot(predictions, residuals,
+     main = "Residuals vs Fitted",
+     xlab = "Fitted Values (Predicted Ladder Score)",
+     ylab = "Residuals",
+     pch = 19, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+#### KNN: K-Nearest Neighbor with all Features (using cross validation with 10 Folds)
+
+```{r,include=TRUE}
+library(dplyr)
+library(caret) 
+
+trainIndex <- sample(1:nrow(all_combined), size = 0.8 * nrow(all_combined))
+trainData <- all_combined[trainIndex, ]
+testData <- all_combined[-trainIndex, ]
+
+knn_model <- train(LadderScore ~ SocialSupport + LifeExpectancy + 
+              LoggedGDP + FreedomChoice + 
+              Generosity + Corruption + Year, 
+                   data = trainData, 
+                   method = "knn", 
+                   trControl = trainControl(method = "cv", number = 10), 
+                   tuneGrid = data.frame(k = 5))
+
+
+
+knn_predictions <- predict(knn_model, testData)
+comparison_knn <- data.frame(Actual = testData$LadderScore, Predicted = knn_predictions)
+head(comparison_knn)
+
+```
+
+```{r,include=TRUE}
+head(comparison_knn)
+```
+
+MSE of K-Nearest Neighbors
+
+```{r,include=TRUE}
+mse_knn <- mean((comparison_knn$Actual - comparison_knn$Predicted)^2)
+mse_knn
+```
+
+```{r,echo=TRUE,fig.height = 2.75, fig.width = 3.5}
+residuals <- testData$LadderScore - predictions
+
+plot(predictions, residuals,
+     main = "Residuals vs Fitted",
+     xlab = "Fitted Values (Predicted Ladder Score)",
+     ylab = "Residuals",
+     pch = 19, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+Residual plot confirms assumptions of potenital non-linearity. This plot
+shows heteroskadasity is present.
+
+### Experimental Results
+
+Model Conclusions: Looking at our models and results, we can conclude
+that Model 4, the polynomial regression model using every feature is the
+most accurate. Firstly, comparing the MSE values, Model 1: 0.2476255,
+Model2: 0.2696678, Model 3: 0.3572924, Model 4: 0.2458762, Model 5:
+0.4604506, we notice that Model 4 has the lowest indicating it is
+performing the best on test data. This suggests that the inclusion of
+all the features and the polynomial transformation used was able to
+effectively capture the relationship present within the data. More
+specifically, this model used squared the features logged gdp and
+freedom of choice to capture non-linear relationships. Model 1, linear
+with all features, also has a low MSE at 0.2476255 however, the
+additionally complexity of Model 4 allows it to fit to the train data
+better. On the other hand, K-nearest neighbor had the highest MSE, this
+could be due to a number of reasons: potential scaling issues, high
+dimensional data, and potential non-linearity present.
+
+Our analysis also revealed several important trends and relationships
+within the data:
+
+1\. Positive Relationships: Social support, healthy life expectancy, and
+GDP per capita had strong positive correlations with happiness scores
+
+2\. Negative Relationship: Perceptions of corruption were negatively
+correlated with happiness scores
+
+3\. Moderate Relationship: Freedom to make life choices had a positive
+relationship but not as influential and strong as the other three
+
+4\. Minimal Impact: Generosity showed little to no relationship to
+happiness
+
+In terms of the countries themselves, the trends highlighted that
+Finland and Austria consistently ranked among the happiest countries,
+while Switzerland had a significant drop from 3rd to 9th place over the
+past five years. Since we were able to visualize our correlations using
+scatter plots, heatmaps and other tools, we observed clear patterns that
+provided a deeper understanding of the relationships between variables
+and happiness scores. Between the factors themselves, we found that
+there is a strong correlation between social support and ladder score,
+life expectancy and GDP, ladder score and GDP, social support and GDP,
+and ladder score and life expectancy.
+
+### Conclusion
+
+We began this project with the goal to analyze data from 2020-2024 to
+understand the factors that most significantly influence happiness. We
+did this using the World Happiness Report, which calculates happiness
+rank using factors such as GDP per capita, healthy life expectancy,
+social support, freedom to make life choices, generosity, and
+perceptions of corruption. Through exploratory data analysis and data
+visualizations such as scatterplots, correlation matrices, histograms,
+and linear regression models. Through this, we found positive
+relationships for social support, healthy life expectancy, and GDP per
+capita with happiness scores. There is a negative relationship with
+corruption perception and happiness scores. There was a moderate
+relationship with freedom to make life choices with happiness scores.
+And, there was little to no relationship for generosity with happiness.
+We also found that Finland and Austria have consistently been the
+happiest countries, while Switzerland has dropped over the past five
+years. So, if a country would like to increase their happiness score,
+they should focus on improving their social support, healthy life
+expectancy, and GDP per capita, and decrease perceptions of corruption.
+Our country, the United States, already has a high GDP per capita, so if
+we would like to improve our happiness scores, we should increase social
+support and healthy life expectancy, and decrease perceptions of
+corruption.
+
+### Links:
+
+<https://worldhappiness.report/data/>
